@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SARATHI Chatbot</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        .content {
+            padding: 20px;
+            background: #fff;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #chatbox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        .userText {
+            color: blue;
+        }
+        .botText {
+            color: green;
+        }
+        #userInput {
+            width: 75%;
+            padding: 10px;
+        }
+        #sendButton {
+            width: 20%;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SARATHI Chatbot</h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="content">
+            <div id="chatbox">
+                <p class="botText"><span>Welcome to SARATHI Chatbot!</span></p>
+            </div>
+            <input id="userInput" type="text" placeholder="Type your message here..." />
+            <button id="sendButton">Send</button>
+            <br>
+            <label for="targetLanguage">Language:</label>
+            <select id="targetLanguage">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <!-- Add more languages as needed -->
+            </select>
+        </div>
+    </div>
+    <script>
+        function getBotResponse() {
+            var userText = $("#userInput").val();
+            var targetLanguage = $("#targetLanguage").val();
+            var userHtml = '<p class="userText"><span>' + userText + '</span></p>';
+            $("#userInput").val("");
+            $("#chatbox").append(userHtml);
+
+            $.post("/get_response", { 
+                input_type: 'text', 
+                user_input: userText, 
+                target_language: targetLanguage 
+            }).done(function(data) {
+                var botHtml;
+                if (data.error) {
+                    botHtml = '<p class="botText"><span>' + data.error + '</span></p>';
+                } else if (data.message) {
+                    botHtml = '<p class="botText"><span>' + data.message + '</span></p>';
+                } else {
+                    botHtml = '<p class="botText"><span>Source: ' + data.source + '<br>Destination: ' + data.destination + '<br>' + data.response + '</span></p>';
+                }
+                $("#chatbox").append(botHtml);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+            });
+        }
+
+        $("#sendButton").on("click", function() {
+            getBotResponse();
+        });
+    </script>
+</body>
+</html>
